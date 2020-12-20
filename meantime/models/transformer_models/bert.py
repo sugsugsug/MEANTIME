@@ -2,6 +2,9 @@ from .bert_base import BertBaseModel
 from .embeddings import *
 from .bodies import BertBody
 from .heads import *
+import time
+
+
 
 import torch.nn as nn
 
@@ -22,6 +25,11 @@ class BertModel(BertBaseModel):
         self.ln = nn.LayerNorm(args.hidden_units)
         self.dropout = nn.Dropout(p=args.dropout)
         self.init_weights()
+        #print('token_embedding',sum(p.numel() for p in self.token_embedding.parameters() if p.requires_grad))
+        #print('pos_embedding',sum(p.numel() for p in self.positional_embedding.parameters() if p.requires_grad))
+        #print('body',sum(p.numel() for p in self.body.parameters() if p.requires_grad))
+        #print('head',sum(p.numel() for p in self.head.parameters() if p.requires_grad))
+
 
     @classmethod
     def code(cls):
@@ -35,13 +43,17 @@ class BertModel(BertBaseModel):
         e = self.dropout(e)  # B x T x H
 
         info = {} if self.output_info else None
+        start = time.time()
         b = self.body(e, attn_mask, info)  # B x T x H
+        #print("body time :", time.time() - start) 
         return b, info
 
     def get_scores(self, d, logits):
         # logits : B x H or M x H
         if self.training:  # logits : M x H, returns M x V
+            start = time.time()
             h = self.head(logits)  # M x V
+            #print("head time :", time.time() - start) 
         else:  # logits : B x H,  returns B x C
             candidates = d['candidates']  # B x C
             h = self.head(logits, candidates)  # B x C

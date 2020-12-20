@@ -39,7 +39,7 @@ momentum: null
 decay_step: 25
 gamma: 1.0
 clip_grad_norm: 5.0
-num_epochs: -1
+num_epochs: 100
 log_period_as_iter: 12800
 metric_ks:
 - 1

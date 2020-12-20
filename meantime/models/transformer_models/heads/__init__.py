@@ -2,6 +2,7 @@ from ..utils import GELU
 
 import torch
 import torch.nn as nn
+from meantime.models.transformer_models.utils.fake_quant import QuantizedLinear
 
 
 class BertLinearPredictionHead(nn.Module):
@@ -38,15 +39,18 @@ class BertDotProductPredictionHead(nn.Module):
         if input_size is None:
             input_size = hidden
         self.vocab_size = args.num_items + 1
+        ### linear -> 
         if args.head_use_ln:
             self.out = nn.Sequential(
                 nn.Linear(input_size, hidden),
+                #QuantizedLinear(input_size, hidden, mode='ema', weight_bits=8),
                 GELU(),
                 nn.LayerNorm(hidden)
             )
         else:
             self.out = nn.Sequential(
                 nn.Linear(input_size, hidden),
+                #QuantizedLinear(input_size, hidden, mode='ema', weight_bits=8),
                 GELU(),
             )
         self.bias = nn.Parameter(torch.zeros(1, self.vocab_size))

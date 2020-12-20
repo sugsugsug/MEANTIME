@@ -1,13 +1,26 @@
 import torch
 import torch.nn as nn
-
+from ..utils.fake_quant import QuantizedEmbedding
 
 class TokenEmbedding(nn.Module):
     def __init__(self, args):
         super().__init__()
         vocab_size = args.num_items + 2
+        print(vocab_size)
         hidden = args.hidden_units
-        self.emb = nn.Embedding(vocab_size, hidden, padding_idx=0)
+        #self.emb = nn.Embedding(vocab_size, hidden, padding_idx=0)
+        #raw_weight = torch.empty(vocab_size, hidden).cuda()
+        #nn.init.normal_(raw_weight)
+        #u, s, v = torch.svd(raw_weight)
+        #svd_size = 1
+        #left=torch.matmul(u[:,:svd_size],torch.diag(s)[:svd_size,:svd_size])
+        #reduced = torch.matmul(left,v[:,:svd_size].transpose(0,1))
+        #reduced = raw_weight
+        #self.emb = w
+        #self.weight = w
+        #self.emb = nn.Embedding(vocab_size, hidden, padding_idx=0, _weight=reduced)
+        #self.emb = nn.Embedding(vocab_size, hidden, padding_idx=0)
+        self.emb = QuantizedEmbedding(vocab_size, hidden, padding_idx=0, mode='dynamic',weight_bits=4)
 
     def forward(self, d):
         x = d['tokens']  # B x T

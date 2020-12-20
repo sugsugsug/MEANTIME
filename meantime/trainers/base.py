@@ -95,7 +95,8 @@ class AbstractTrainer(metaclass=ABCMeta):
             fix_random_seed_as(epoch)  # fix random seed at every epoch to make it perfectly resumable
             accum_iter = self.train_one_epoch(epoch, accum_iter, self.train_loader)
             self.lr_scheduler.step()  # step before val because state_dict is saved at val. it doesn't affect val result
-
+            
+            """
             val_log_data = self.validate(epoch, accum_iter, mode='val')
             metric = val_log_data[self.best_metric]
             if metric > best_metric:
@@ -104,8 +105,10 @@ class AbstractTrainer(metaclass=ABCMeta):
             elif (self.saturation_wait_epochs is not None) and\
                     (epoch - best_epoch >= self.saturation_wait_epochs):
                 stop_training = True  # stop training if val perf doesn't improve for saturation_wait_epochs
-
-            if stop_training:
+            """
+            if epoch == self.num_epochs-1:
+              self.validate(epoch, accum_iter, mode='test')
+            if stop_training and False:
                 # load best model
                 best_model_logger = self.val_loggers[-1]
                 assert isinstance(best_model_logger, BestModelLogger)
